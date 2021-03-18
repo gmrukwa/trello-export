@@ -84,8 +84,8 @@ if trello_content:
     data = load_data(trello_content)
     selected_lists = st.sidebar.multiselect(
         'Lists',
-        active_lists(),
-        default=active_lists(),
+        active_lists(trello_content),
+        default=active_lists(trello_content),
         format_func=lambda l: l['listName'],
     )
     selected_labels = st.sidebar.multiselect(
@@ -97,11 +97,11 @@ if trello_content:
     st.title('Your cards')
 
     selected_lists = pd.DataFrame(selected_lists).set_index('idList')
-    df = active_cards()
+    df = active_cards(trello_content)
     df = df.join(selected_lists, on='idList', how='inner').drop(columns=['idList'])
 
     df = df[df.idLabels.apply(lambda labels: all(l['id'] in labels for l in selected_labels))]
-    df.idLabels = df.idLabels.apply(lambda labels: [labels_map()[l] for l in labels])
+    df.idLabels = df.idLabels.apply(lambda labels: [labels_map(trello_content)[l] for l in labels])
     df = df.rename(columns={'idLabels': 'labels'})
 
     st.write(df)
